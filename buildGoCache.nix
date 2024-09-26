@@ -65,9 +65,15 @@ buildGoModule {
     mkdir -p $GOPATH/src
     xargs go build <${importPackagesFile}
     mkdir -p $out/nix-support
-    cat > $out/nix-support/setup-hook <<EOF
-      cp --reflink=auto -r $out/go-cache $TMPDIR/go-cache
-      chmod -R +w $TMPDIR/go-cache
+    cat > $out/nix-support/setup-hook <<'EOF'
+      mkdir -p "$TMPDIR" || true
+      if [ -d "$TMPDIR" ]; then
+        echo "copying ${placeholder "out"}/go-cache" "$TMPDIR/go-cache"
+        cp --reflink=auto -r "${placeholder "out"}/go-cache" "$TMPDIR/go-cache"
+        chmod -R +w "$TMPDIR/go-cache"
+      else
+        echo skipping build-go-cache copy
+      fi
       ${lib.optionalString proxyVendor ''export GOMODCACHE="$out/go-mod-cache"''}
     EOF
   '';
