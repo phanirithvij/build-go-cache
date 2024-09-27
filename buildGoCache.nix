@@ -42,7 +42,7 @@ buildGoModule {
     cd source
   '';
   inherit proxyVendor;
-  buildPhase = ''
+  buildPhase = let pl = placeholder "out"; in ''
     export HOME=$TMPDIR
     mkdir -p $out/
 
@@ -68,7 +68,7 @@ buildGoModule {
     cat > $out/nix-support/setup-hook <<'EOF'
       mkdir -p "$TMPDIR" || true
       if [ -d "$TMPDIR" ]; then
-        echo "copying ${placeholder "out"}/go-cache" "$TMPDIR/go-cache"
+        echo "copying ${builtins.trace pl pl}/go-cache" "$TMPDIR/go-cache"
         cp --reflink=auto -r "${placeholder "out"}/go-cache" "$TMPDIR/go-cache"
         chmod -R +w "$TMPDIR/go-cache"
       else
